@@ -1,0 +1,17 @@
+{
+  "verifiedAt": "2026-10-10",
+  "git": {
+    "version": "2.56.0.2",
+    "url": "https://github.com/git-for-windows/git/releases/download/v2.56.0.windows.2/PortableGit-2.56.0.2-64-bit.7z.exe",
+    "sha256": "075e158ef8e1f0ab80b347e245405d3eca735c2dc88fd8e032e137d0ca61f61b",
+    "source": "https://api.github.com/repos/git-for-windows/git/releases/latest",
+    "format": "portable-sfx"
+  },
+  "python": {
+    "version": "3.13.12",
+    "url": "https://www.python.org/ftp/python/3.13.12/python-3.13.12-amd64.zip",
+    "sha256": "9089c1f0d720f7c913cd4caf600e6761b0a4d5b90ccf34229fe418ff64a5da5f",
+    "source": "https://www.python.org/ftp/python/3.13.12/windows-3.13.12.json",
+    "format": "python-runtime-zip"
+  }
+}

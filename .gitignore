@@ -1,0 +1,30 @@
+# 只放源码。体积大/可再生成/带密钥的东西一律不进仓库。
+
+# 依赖与构建产物
+node_modules/
+app/node_modules/
+app/release/
+app/engine/          # dist.js 打包时从 ../engine 复制的临时副本
+engine/state/        # 运行态(manifest/日志)
+
+# 随包分发或按需下载的运行时二进制(107MB,非源码;构建前另备)
+app/runtime/
+
+# 本地工作区 / 归档 / 发布物
+work/
+archive/
+docs/接力/
+release/
+*.exe
+*.blockmap
+*.iso
+
+# 密钥 / 环境 / 日志(含测试期间产生的密钥夹具)
+.env
+*.env
+*.log
+logs/
+*.pem
+*.key
+auth.json
+credentials.json

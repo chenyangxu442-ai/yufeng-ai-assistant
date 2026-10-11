@@ -1,0 +1,21 @@
+{
+  "name": "@ai-setup/dsh-client-ui-skill-library",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "与风AI助手:侧栏技能库(本地浏览/搜索/分类多选 → 写入当前会话草稿)",
+  "main": "lib/index.js",
+  "exports": {
+    ".": {
+      "default": "./lib/index.js"
+    },
+    "./client": {
+      "default": "./lib/client.js"
+    }
+  },
+  "dsh": {
+    "client": {
+      "platform": "web"
+    }
+  }
+}

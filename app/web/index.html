@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>与风AI助手</title>
+<style>
+  :root {
+    --background: #ffffff; --foreground: #0a0a0a;
+    --card: #ffffff; --card-border: #e4e4e7;
+    --primary: #0a0a0a; --primary-foreground: #fafafa;
+    --secondary: #f4f4f5; --secondary-foreground: #18181b;
+    --muted: #f4f4f5; --muted-foreground: #71717a;
+    --accent: #f4f4f5; --accent-foreground: #18181b;
+    --destructive: #dc2626;
+    --sidebar: #fafafa; --sidebar-border: #e4e4e7; --sidebar-accent: #f4f4f5;
+    --radius: 0.625rem;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif; background: var(--background); color: var(--foreground); font-size: 14px; }
+  .app { display: flex; height: 100%; }
+  svg { display: block; }
+
+  .sidebar { width: 248px; flex-shrink: 0; background: var(--sidebar); border-right: 1px solid var(--sidebar-border); display: flex; flex-direction: column; }
+  .sb-brand { display: flex; align-items: center; gap: 10px; padding: 20px 16px 16px; }
+  .sb-brand svg { color: var(--primary); }
+  .brandmark { display: block; border-radius: 7px; object-fit: contain; flex-shrink: 0; }
+  .sb-brand .name { font-size: 17px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.2; }
+  .sb-brand .sub { font-size: 12px; color: var(--muted-foreground); line-height: 1.2; }
+  .sb-nav { padding: 8px; display: flex; flex-direction: column; gap: 2px; }
+  .sb-label { padding: 6px 10px 4px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--muted-foreground); }
+  .nav-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: calc(var(--radius) - 2px); color: var(--foreground); font-weight: 500; font-size: 13px; cursor: pointer; }
+  .nav-item:hover { background: var(--sidebar-accent); }
+  .nav-item.active { background: var(--sidebar-accent); }
+  .nav-item svg { color: var(--muted-foreground); flex-shrink: 0; }
+  .nav-item.active svg { color: var(--primary); }
+  .nav-item .st { margin-left: auto; flex-shrink: 0; width: 16px; height: 16px; }
+  .nav-item .st svg { width: 16px; height: 16px; color: #16a34a; }
+  .card { scroll-margin-top: 16px; }
+  .sb-foot { margin-top: auto; padding: 16px; font-size: 12px; color: var(--muted-foreground); }
+  .sb-contact { margin-top: 10px; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
+  .sb-contact .who { font-weight: 600; color: var(--foreground); margin-bottom: 2px; }
+  .cbtn, .clink { background: none; border: none; padding: 0; font: inherit; color: var(--muted-foreground); cursor: pointer; text-align: left; text-decoration: none; }
+  .cbtn:hover, .clink:hover { color: var(--foreground); text-decoration: underline; }
+  .cbtn[data-copy]:hover::after { content: ' · 点击复制'; }
+
+  .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .topbar { display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--card-border); padding: 16px 28px; }
+  .topbar h1 { font-size: 17px; font-weight: 600; letter-spacing: -0.01em; margin: 0; }
+  .topbar .sub { font-size: 13px; color: var(--muted-foreground); }
+  .topbar .spacer { margin-left: auto; }
+  .badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted-foreground); }
+  .dot { width: 7px; height: 7px; border-radius: 50%; }
+  .dot.on { background: #16a34a; } .dot.off { background: #a1a1aa; }
+
+  .content { flex: 1; overflow: auto; padding: 24px 28px 48px; max-width: 760px; }
+  .card { background: var(--card); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 20px; margin-bottom: 14px; }
+  .card h2 { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; margin: 0 0 4px; }
+  .card h2 svg { color: var(--primary); }
+  .card .desc { font-size: 13px; color: var(--muted-foreground); margin: 0 0 12px; }
+  .num { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 6px; background: var(--primary); color: var(--primary-foreground); font-size: 12px; font-weight: 600; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  td { padding: 8px 4px; border-bottom: 1px solid #f4f4f5; }
+  tr:last-child td { border-bottom: none; }
+  .status { font-weight: 500; }
+  .status .ok { color: #16a34a; } .status .bad { color: var(--destructive); }
+  .hint { font-size: 12px; color: var(--muted-foreground); }
+
+  .key-row { display: flex; gap: 8px; }
+  input { flex: 1; padding: 9px 12px; border: 1px solid var(--card-border); border-radius: calc(var(--radius) - 2px); font-size: 14px; font-family: inherit; background: var(--background); color: var(--foreground); }
+  input:focus { outline: none; border-color: var(--primary); border-width: 2px; padding: 8px 11px; }
+
+  .btn { display: inline-flex; align-items: center; gap: 8px; border: none; cursor: pointer; font-family: inherit; font-size: 13px; font-weight: 500; padding: 9px 16px; border-radius: calc(var(--radius) - 2px); transition: opacity .15s; }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  .btn.primary { background: var(--primary); color: var(--primary-foreground); }
+  .btn.primary:hover:not(:disabled) { opacity: .9; }
+  .btn.secondary { background: var(--secondary); color: var(--secondary-foreground); }
+  .btn.secondary:hover { background: #e9e9ec; }
+  .btn svg { color: inherit; }
+
+  /* 进度:总条 + 步骤列表 */
+  .bar { height: 6px; background: var(--muted); border-radius: 999px; overflow: hidden; margin: 4px 0 14px; display: none; }
+  .bar > i { display: block; height: 100%; width: 0; background: var(--primary); transition: width .3s ease; }
+  .steps { display: none; margin: 0 0 12px; padding: 0; list-style: none; font-size: 13px; }
+  .steps li { display: flex; align-items: center; gap: 8px; padding: 5px 0; color: var(--muted-foreground); }
+  .steps li .ic { width: 16px; height: 16px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .steps li.doing { color: var(--foreground); font-weight: 500; }
+  .steps li.done { color: var(--foreground); }
+  .steps li.fail { color: var(--destructive); font-weight: 500; }
+  .steps li .ms { margin-left: auto; font-size: 12px; color: var(--muted-foreground); }
+  .spin { width: 12px; height: 12px; border: 2px solid var(--muted-foreground); border-top-color: transparent; border-radius: 50%; animation: sp .7s linear infinite; }
+  @keyframes sp { to { transform: rotate(360deg); } }
+
+  #log { background: #18181b; color: #d1fae5; font: 12px/1.7 ui-monospace, Consolas, monospace; padding: 12px 14px; border-radius: calc(var(--radius) - 2px); white-space: pre-wrap; display: none; max-height: 200px; overflow: auto; margin-top: 12px; }
+  .banner { border: 1px solid #fde68a; background: #fffbeb; color: #92400e; border-radius: calc(var(--radius) - 2px); padding: 10px 12px; font-size: 13px; margin-bottom: 14px; display: none; }
+  .banner.err { border-color: #fca5a5; background: #fef2f2; color: #b91c1c; }
+  .banner.ok { border-color: #86efac; background: #f0fdf4; color: #15803d; }
+  a.link { color: var(--primary); text-decoration: underline; }
+  @media (max-width: 700px) {
+    .app { flex-direction: column; }
+    .sidebar { width: 100%; border-right: 0; border-bottom: 1px solid var(--sidebar-border); }
+    .sb-brand { padding: 12px; }
+    .sb-nav { flex-direction: row; overflow-x: auto; }
+    .sb-label, .sb-foot { display: none; }
+    .nav-item { flex-shrink: 0; }
+    .main { min-height: 0; }
+    .topbar { padding: 12px; flex-wrap: wrap; }
+    .content { padding: 12px; max-width: none; }
+    .key-row { flex-wrap: wrap; }
+    .key-row input { min-width: 0; flex-basis: 100%; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="sb-brand">
+      <img class="brandmark" src="yufeng.png" alt="与风AI助手" width="30" height="30">
+      <div>
+        <div class="name">与风AI助手</div>
+        <div class="sub">一键装好并接上 DeepSeek</div>
+      </div>
+    </div>
+    <nav class="sb-nav">
+      <div class="sb-label">安装步骤</div>
+      <div class="nav-item active" data-step="1"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg>电脑体检<span class="st"></span></div>
+      <div class="nav-item" data-step="2"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"/><circle cx="16.5" cy="7.5" r=".5" fill="currentColor"/></svg>填入 API key<span class="st"></span></div>
+      <div class="nav-item" data-step="3"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>一键安装<span class="st"></span></div>
+      <div class="nav-item" data-step="4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>完成<span class="st"></span></div>
+    </nav>
+    <div class="sb-foot">
+      <div>配置保存在本机；对话发送给 DeepSeek</div>
+      <div class="sb-contact">
+        <span class="who">联系开发者</span>
+        <button type="button" class="cbtn" id="copyWx" data-copy="xxx890332" title="点击复制微信号">微信 xxx890332</button>
+        <a class="clink" href="mailto:chenyangxu442@gmail.com" title="点击发邮件">chenyangxu442@gmail.com</a>
+        <button type="button" class="cbtn" id="copyMail" data-copy="chenyangxu442@gmail.com" title="点击复制邮箱">复制邮箱</button>
+        <a class="clink" id="githubLink" href="https://github.com/chenyangxu442-ai/yufeng-ai-assistant" target="_blank" rel="noopener noreferrer">开源项目，欢迎交流。有疑问请联系，有问题欢迎反馈。</a>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <h1>安装向导</h1>
+      <span class="sub" id="workdirHint"></span>
+      <div class="spacer"></div>
+      <div class="badge"><span class="dot" id="cfgDot"></span><span id="cfgText">检测中…</span></div>
+    </header>
+
+    <div class="content">
+      <div class="banner" id="banner"></div>
+
+      <div class="card" data-card="1">
+        <h2><span class="num">1</span>电脑体检</h2>
+        <p class="desc">自动检查软件自带的运行环境，不需要另外安装 Node。</p>
+        <table id="health"><tr><td>检测中…</td></tr></table>
+        <button class="btn secondary" id="networkBtn">检查网络</button>
+        <p class="desc" id="networkHint">分别检查下载源和 AI 服务，不发送密钥。安装前也会自动检查。</p>
+      </div>
+
+      <div class="card" data-card="2">
+        <h2><span class="num">2</span>填入 DeepSeek API key</h2>
+        <p class="desc">还没有 key？去 <a class="link" href="https://platform.deepseek.com" target="_blank" rel="noopener noreferrer">DeepSeek 官网</a> 创建。密钥保存在本机，测试和使用时发送给 DeepSeek 验证。</p>
+        <div class="key-row">
+          <input type="password" id="key" placeholder="sk- 开头的 key" autocomplete="off" spellcheck="false">
+          <button class="btn secondary" id="toggleKey">显示</button>
+          <button class="btn secondary" id="testKey">测一下</button>
+        </div>
+      </div>
+
+      <div class="card" data-card="3">
+        <h2><span class="num">3</span>一键安装</h2>
+        <p class="desc">软件已自带运行环境。填入密钥后即可联网下载并安装 AI 助手，中途不要关窗口。</p>
+        <button class="btn primary" id="installBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+          开始安装
+        </button>
+        <button class="btn secondary" id="repairBtn">一键修复</button>
+        <p class="desc">修复保留已有密钥和聊天数据。运行正常时只修桌面入口；重新下载失败时恢复旧组件。</p>
+        <div class="bar" id="bar"><i></i></div>
+        <ul class="steps" id="steps"></ul>
+        <div id="log"></div>
+      </div>
+
+      <div class="card" id="doneCard" data-card="4" style="display:none">
+        <h2><span class="num">4</span>装好了</h2>
+        <p class="desc" id="doneText"></p>
+        <button class="btn primary" id="openBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/></svg>
+          打开与风AI助手
+        </button>
+        <button class="btn secondary" id="shortcutBtn">创建桌面入口</button>
+        <p class="desc" id="shortcutHint">安装完成后会在桌面生成“与风AI助手”。以后双击它就能启动并打开网页。</p>
+        <p style="font-size:12px;color:var(--muted-foreground);margin:10px 0 0">会在浏览器里打开。直接打字说话就行,比如:「帮我写一份周报」。</p>
+      </div>
+    
+</div>
+  </div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+
+function log(msg) {
+  const el = $('log');
+  el.style.display = 'block';
+  el.textContent += msg + '\n';
+  el.scrollTop = el.scrollHeight;
+}
+function banner(msg, kind) {
+  const el = $('banner');
+  el.style.display = 'block';
+  el.textContent = msg;
+  el.className = 'banner' + (kind ? ' ' + kind : '');
+}
+function clearBanner() { $('banner').style.display = 'none'; }
+function setCfg(configured) {
+  $('cfgDot').className = 'dot ' + (configured ? 'on' : 'off');
+  $('cfgText').textContent = configured ? '已配置' : '未配置';
+}
+async function api(path, body) {
+  const r = await fetch('/api' + path, {
+    method: body ? 'POST' : 'GET',
+    headers: { 'Content-Type': 'application/json' },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const result = await r.json();
+  if (!r.ok) throw new Error(result.error || result.err || '请求失败，请重试');
+  return result;
+}
+let configured = false;
+
+const CHECK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+const CROSS_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+
+const steps = [...document.querySelectorAll('.nav-item[data-step]')];
+const cards = [...document.querySelectorAll('.card[data-card]')];
+steps.forEach((s) => s.onclick = () => {
+  const el = document.querySelector(`.card[data-card="${s.dataset.step}"]`);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+function setActive(step) {
+  steps.forEach((s) => s.classList.toggle('active', +s.dataset.step === step));
+}
+const io = new IntersectionObserver((es) => {
+  es.forEach((e) => { if (e.isIntersecting) setActive(+e.target.dataset.card); });
+}, { root: document.querySelector('.content'), threshold: 0.25 });
+cards.forEach((c) => io.observe(c));
+function markStep(n, done) {
+  for (let i = 1; i <= n; i++) {
+    const st = document.querySelector(`.nav-item[data-step="${i}"] .st`);
+    if (!st || (done && st.querySelector('svg'))) continue;
+    st.innerHTML = done ? CHECK_SVG : '';
+  }
+}
+
+async function refreshHealth() {
+  const { items } = await api('/detect');
+  $('health').innerHTML = '<table>' + items.map((i) =>
+    `<tr><td>${i.name}<div class="hint">${i.hint || ''}</div></td>` +
+    `<td class="status"><span class="${i.installed ? 'ok' : 'bad'}">${i.installed ? '✓ ' + (i.version || '已就绪') : '✗ ' + (i.version || '缺失')}</span></td></tr>`
+  ).join('') + '</table>';
+}
+
+async function init() {
+  clearBanner();
+  const s = await api('/status');
+  if (s.shortcut) $('shortcutHint').textContent = s.shortcut.message;
+  $('workdirHint').textContent = s.installed ? '已安装' : '';
+  setCfg(s.configured);
+  await refreshHealth();
+  if (s.installed && s.configured) {
+    markStep(4, true);
+    $('doneCard').style.display = 'block';
+    $('doneText').textContent = '已安装并保存密钥。可打开助手；密钥是否有效请点「测一下」确认。重新安装会修复当前固定版本。';
+  }
+  configured = s.configured;
+}
+
+$('toggleKey').onclick = () => {
+  const k = $('key');
+  k.type = k.type === 'password' ? 'text' : 'password';
+  $('toggleKey').textContent = k.type === 'password' ? '显示' : '隐藏';
+};
+
+// 测 key:先用 /api/test 单独验一把,不用等装完才知道对不对
+$('testKey').onclick = async () => {
+  clearBanner();
+  const key = $('key').value.trim();
+  if (key && !/^sk-[A-Za-z0-9_-]+$/.test(key)) return banner('请粘贴完整密钥，不要包含空格或换行', 'err');
+  if (!key && !configured) return banner('请先粘贴密钥', 'err');
+  const b = $('testKey');
+  b.disabled = true; b.textContent = '测试中…';
+  try {
+    const t = await api('/test', { key });
+    banner(t.ok ? '这把密钥能用' : (t.err || '密钥用不了'), t.ok ? 'ok' : 'err');
+  } catch (e) { banner('测试失败：' + e.message, 'err'); }
+  finally { b.disabled = false; b.textContent = '测一下'; }
+};
+
+// 步骤列表:随事件实时更新
+let stepEls = {};
+function buildSteps(total) {
+  const ul = $('steps');
+  ul.innerHTML = '';
+  ul.style.display = 'block';
+  stepEls = {};
+  for (let i = 0; i < total; i++) {
+    const li = document.createElement('li');
+    li.innerHTML = '<span class="ic"></span><span class="tx"></span><span class="ms"></span>';
+    ul.appendChild(li);
+    stepEls[i] = li;
+  }
+  $('bar').style.display = 'block';
+}
+function setBar(pct) { $('bar').querySelector('i').style.width = Math.min(100, pct) + '%'; }
+
+let curStep = -1;
+function handleEvent(e) {
+  if (e.type === 'network') { showNetwork(e); return; }
+  if (e.type === 'shortcut') {
+    $('shortcutHint').textContent = e.message;
+    log((e.ok ? '✓ ' : '提示：') + e.message);
+    return;
+  }
+  if (e.type === 'phase' || e.type === 'log') { log('· ' + e.message); }
+  else if (e.type === 'progress') {
+    // 要装的包总数事先不知道,所以显示"已下载 N 个包",不画假的百分比
+    if (e.total) setBar((e.got / e.total) * 100);
+    const li = stepEls[curStep];
+    if (li) li.querySelector('.ms').textContent = '已下载 ' + e.got + ' 个包';
+  }
+  else if (e.type === 'note') { log('  ' + e.message); }
+  else if (e.type === 'stage-start') {
+    if (Object.keys(stepEls).length !== e.total) buildSteps(e.total);
+    curStep = e.index - 1;
+    const li = stepEls[curStep];
+    if (li) {
+      li.className = 'doing';
+      li.querySelector('.ic').innerHTML = '<span class="spin"></span>';
+      li.querySelector('.tx').textContent = e.title;
+      if (e.note) li.querySelector('.ms').textContent = e.note;
+    }
+    log(`[${e.index}/${e.total}] ${e.title}${e.note ? '  (' + e.note + ')' : ''}`);
+    setBar((e.index - 1) / e.total * 100);
+  }
+  else if (e.type === 'stage-done') {
+    const li = stepEls[e.index - 1];
+    if (li) {
+      li.className = 'done';
+      li.querySelector('.ic').innerHTML = CHECK_SVG;
+      li.querySelector('.ms').textContent = e.note || (e.skipped ? '已就绪' : '');
+    }
+    setBar(e.index / e.total * 100);
+  }
+  else if (e.type === 'stage-fail') {
+    // 失败的那一步必须当场标出来。不标的话它会一直转圈,
+    // 用户看到的就是"卡在这一步" —— 真正的原因根本找不到。
+    const li = stepEls[e.index - 1];
+    if (li) {
+      li.className = 'fail';
+      li.querySelector('.ic').innerHTML = CROSS_SVG;
+      li.querySelector('.ms').textContent = '失败';
+    }
+    log('  ✗ ' + e.message);
+  }
+  else if (e.type === 'error') {
+    banner(e.message, 'err');
+    // 提示条在页面顶上,用户正盯着下面转圈的步骤 —— 把它滚到眼前
+    $('banner').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+}
+
+async function runInstall(repair = false) {
+  if ($('installBtn').disabled) return;
+  clearBanner();
+  const key = $('key').value.trim();
+  if (key && !/^sk-[A-Za-z0-9_-]+$/.test(key)) return banner('请粘贴完整密钥，不要包含空格或换行', 'err');
+  if (!repair && !key && !configured) return banner('请先粘贴 DeepSeek 密钥', 'err');
+
+  const btn = $('installBtn');
+  btn.disabled = true; btn.textContent = '安装中…';
+  $('openBtn').disabled = true;
+  $('shortcutBtn').disabled = true;
+  $('repairBtn').disabled = true;
+  $('doneCard').style.display = 'none';
+  markStep(4, false);
+  buildSteps(5);
+  curStep = -1;
+  setBar(0);
+  $('log').textContent = '';
+  log('开始安装,请保持网络畅通…');
+
+  try {
+    const res = await fetch(repair ? '/api/repair' : '/api/install', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(repair ? {} : { key }),
+    });
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.error || '安装请求失败');
+    }
+    if (!res.body) throw new Error('安装进度连接中断，请重试');
+
+    // NDJSON 流:一行一个事件。逐块读、按行切。
+    // 最后一块可能不完整,留在 buf 里等下一块 —— 这是流式解析最常见的错。
+    const reader = res.body.getReader();
+    const dec = new TextDecoder();
+    let buf = '';
+    let failed = false;
+    let completed = false;
+    const consume = (line) => {
+      if (!line.trim()) return;
+      const ev = JSON.parse(line);
+      if (ev.type === 'stage-fail' || ev.type === 'error') failed = true;
+      if (ev.type === 'done') completed = true;
+      handleEvent(ev);
+    };
+
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, { stream: true });
+      const lines = buf.split('\n');
+      buf = lines.pop();
+      for (const line of lines) {
+        consume(line);
+      }
+    }
+    buf += dec.decode();
+    consume(buf);
+
+    if (failed) {
+      btn.disabled = false; btn.textContent = '重试安装';
+      return;
+    }
+    if (!completed) throw new Error('安装进度中断，尚未确认完成，请重试');
+
+    configured = true;
+    setCfg(true);
+    $('key').value = '';
+    $('key').type = 'password';
+    $('toggleKey').textContent = '显示';
+    $('doneCard').style.display = 'block';
+    $('doneText').textContent = '助手已安装。正在测试密钥…';
+
+    log('→ 测试连接…');
+    let t;
+    try { t = await api('/test', {}); }
+    catch (e) { t = { ok: false, err: '连接测试失败：' + e.message }; }
+    if (t.ok) {
+      setCfg(true);
+      markStep(4, true);
+      $('doneCard').style.display = 'block';
+      $('doneText').textContent = '与风AI助手装好了,而且连接测试通过。';
+      banner('🎉 全部完成!点下面按钮打开', 'ok');
+      $('doneCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      $('doneText').textContent = '助手已安装，但密钥测试没通过。请检查密钥或网络，再点「测一下」。';
+      banner('装好了,但连接测试没过:' + (t.err || ''), 'err');
+    }
+    btn.textContent = '重新安装';
+    btn.disabled = false;
+  } catch (e) {
+    btn.disabled = false; btn.textContent = '重试安装';
+    banner('安装出错:' + e.message, 'err');
+    const li = stepEls[curStep];
+    if (li && li.className === 'doing') {
+      li.className = 'fail'; li.querySelector('.ic').innerHTML = CROSS_SVG;
+      li.querySelector('.ms').textContent = '连接中断';
+    }
+  } finally {
+    $('openBtn').disabled = false;
+    $('shortcutBtn').disabled = false;
+    $('repairBtn').disabled = false;
+    if (repair) {
+      try {
+        const state = await api('/status');
+        if (state.installed && state.configured && $('doneCard').style.display === 'none') {
+          $('doneCard').style.display = 'block';
+          $('doneText').textContent = '原有助手仍在，可以尝试打开；修复结果请查看上方提示。';
+        }
+      } catch { /* 上方保留原错误，不显示假成功 */ }
+    }
+    try { await refreshHealth(); } catch (e) { log('体检刷新失败：' + e.message); }
+  }
+}
+$('installBtn').onclick = () => runInstall();
+$('repairBtn').onclick = () => runInstall(true);
+
+function showNetwork(result) {
+  $('networkHint').textContent = result.items.map(item => item.name + '：' + item.message).join('；');
+}
+$('networkBtn').onclick = async () => {
+  const b = $('networkBtn');
+  if (b.disabled) return;
+  b.disabled = true; b.textContent = '检查中…';
+  try { showNetwork(await api('/network', {})); }
+  catch { $('networkHint').textContent = '网络检查未完成，请重试'; }
+  finally { b.disabled = false; b.textContent = '检查网络'; }
+};
+
+// 打开 AI 助手。
+// ⚠️ 失败时**必须**说点什么 —— 以前这里只有 `if (r.ok)`,出错就一声不吭,
+// 用户看到的就是"点了没反应"。这种静默失败最难查,别再写第二种。
+$('openBtn').onclick = async () => {
+  const b = $('openBtn');
+  if (b.disabled) return;
+  const label = b.innerHTML;
+  b.disabled = true; b.textContent = '正在启动…';
+  try {
+    const r = await api('/open', {});
+    banner(r.ok ? '已打开,浏览器里直接打字说话就行' : (r.error || '启动失败,请重试'),
+           r.ok ? 'ok' : 'err');
+  } catch (e) {
+    banner('启动失败:' + e.message, 'err');
+  } finally {
+    b.disabled = false; b.innerHTML = label;
+  }
+};
+
+$('shortcutBtn').onclick = async () => {
+  const b = $('shortcutBtn');
+  if (b.disabled) return;
+  b.disabled = true;
+  try {
+    const r = await api('/shortcut', {});
+    $('shortcutHint').textContent = r.message;
+    banner(r.message, r.ok ? 'ok' : 'err');
+  } catch { banner('桌面入口创建失败，请重试；也可直接打开与风AI助手', 'err'); }
+  finally { b.disabled = false; }
+};
+
+// 联系方式:微信/邮箱点一下就复制(邮箱另有 mailto 链接)。复制失败要说出来,别静默。
+document.querySelectorAll('.sb-contact [data-copy]').forEach((el) => {
+  el.onclick = async () => {
+    const text = el.dataset.copy;
+    try { await navigator.clipboard.writeText(text); banner('已复制：' + text, 'ok'); }
+    catch { banner('复制失败，请手动选中：' + text, 'err'); }
+  };
+});
+
+init().catch(e => banner('检测失败：' + e.message + '，请重新打开程序', 'err'));
+
+</script>
+</body>
+</html>

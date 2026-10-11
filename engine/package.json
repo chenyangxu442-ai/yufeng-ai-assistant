@@ -1,0 +1,15 @@
+{
+  "name": "ai-setup-engine",
+  "version": "0.5.5",
+  "private": true,
+  "description": "与风AI助手引擎(纯 Node CLI,零依赖)",
+  "bin": {
+    "ai-setup": "cli.js"
+  },
+  "scripts": {
+    "selfcheck": "node cli.js selfcheck"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

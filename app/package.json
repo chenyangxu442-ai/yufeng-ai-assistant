@@ -1,0 +1,63 @@
+{
+  "name": "ai-setup",
+  "version": "0.5.5",
+  "private": true,
+  "description": "与风AI助手 — 一键装好 AI 助手(DeepSeek Harness)并接上 DeepSeek",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "server": "node server.js",
+    "test": "node ../tests/regression.js && node ../tests/shortcut.js && node ../tests/network-repair.js && node ../tests/skills.js && node ../tests/features.js && node ../tests/file-faults.js && node ../tests/private-env.js",
+    "dist": "node scripts/dist.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "yauzl": "3.4.0"
+  },
+  "devDependencies": {
+    "electron": "^31.3.1",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.aisetup.app",
+    "productName": "与风AI助手",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "main.js",
+      "assistant-shortcut.js",
+      "server.js",
+      "web/**",
+      "assets/**",
+      "engine/**",
+      "!engine/state/**",
+      "skill-library/**"
+    ],
+    "extraResources": [
+      {
+        "from": "runtime/node",
+        "to": "runtime/node",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "assets/yufeng.ico",
+      "signAndEditExecutable": false
+    },
+    "publish": {
+      "provider": "generic",
+      "url": "https://example.com/ai-setup/"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "installerIcon": "assets/yufeng.ico",
+      "uninstallerIcon": "assets/yufeng.ico"
+    }
+  }
+}
