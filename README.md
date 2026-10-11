@@ -38,6 +38,13 @@
   技能会以 `/技能名` 令牌进到输入框，**不会自动发送**，你看过再按发送。
 - **出问题**：安装器上有「一键修复」，会重下组件、重建桌面入口，**保留已有密钥与聊天记录**。
 
+## 官网
+
+产品官网：<https://game.ailover.site/>（备用入口 <http://101.32.194.119/>）
+
+源码在 [`website/`](website/) —— 纯静态 HTML/CSS/JS，**无构建步骤**，丢到任意静态服务器即可。
+官网提供安装包直链 `/downloads/Yufeng-AI-Assistant-Setup-0.5.5.exe`（支持 Range 断点续传）与 SHA-256 校验值。
+
 ## 开源与反馈
 
 - 项目主页：<https://github.com/chenyangxu442-ai/yufeng-ai-assistant>

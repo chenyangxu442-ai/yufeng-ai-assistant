@@ -1,0 +1,4 @@
+# 与风AI助手 · Windows 安装包校验值
+# 版本: 0.5.5  平台: Windows 10/11 x64
+# 文件: Yufeng-AI-Assistant-Setup-0.5.5.exe  (109,329,872 字节)
+9fd89ebdd7a8db795b1aefcfb9c8bfc0e9840e8d03af21ac4de307dee80c5c4a  Yufeng-AI-Assistant-Setup-0.5.5.exe

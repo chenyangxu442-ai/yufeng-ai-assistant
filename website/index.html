@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>与风AI助手 — 一键装好 AI 助手，接上 DeepSeek</title>
+<meta name="description" content="给不写代码的人用的 Windows 桌面安装器：一键装好 AI 助手内核并接上 DeepSeek，自带 538 条中文技能的侧栏技能库。开源，密钥只存本机。">
+<meta name="theme-color" content="#125b60">
+<meta name="color-scheme" content="light">
+<meta property="og:type" content="website">
+<meta property="og:title" content="与风AI助手 — 一键装好 AI 助手，接上 DeepSeek">
+<meta property="og:description" content="Windows 桌面安装器：一键装好 AI 助手内核并接上 DeepSeek，自带 538 条中文技能侧栏技能库。开源。">
+<meta property="og:image" content="assets/scenes.png">
+<link rel="icon" href="assets/icon-64.png" sizes="64x64" type="image/png">
+<link rel="apple-touch-icon" href="assets/icon-192.png">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip" href="#main">跳到主要内容</a>
+
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="brand" href="#top" aria-label="与风AI助手 首页">
+      <img src="assets/icon-64.png" width="28" height="28" alt="" class="brand__mark">
+      <span class="brand__name">与风AI助手</span>
+    </a>
+    <nav class="nav__links" aria-label="页面章节">
+      <a href="#features">功能</a>
+      <a href="#start">上手</a>
+      <a href="#skills">技能</a>
+      <a href="#scenes">场景</a>
+      <a href="#faq">常见问题</a>
+    </nav>
+    <a class="btn btn--sm btn--solid" href="/downloads/Yufeng-AI-Assistant-Setup-0.5.5.exe" data-dl>下载</a>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- HERO -->
+  <section class="hero" id="top">
+    <div class="wrap">
+      <p class="eyebrow">Windows 桌面安装器 · 开源 · v0.5.5</p>
+      <h1 class="hero__title">一键装好 AI 助手，<br>并接上 DeepSeek。</h1>
+      <p class="hero__lede">
+        给不写代码的人用的 Windows 安装器。装完你得到一个能直接打字的 AI 助手界面，
+        另带一个 <strong>538 条中文技能</strong>的侧栏技能库——选中就能把技能写进当前对话。
+      </p>
+      <div class="hero__cta">
+        <a class="btn btn--solid" href="/downloads/Yufeng-AI-Assistant-Setup-0.5.5.exe" data-dl>
+          下载 Windows 版 0.5.5
+        </a>
+        <a class="btn btn--ghost" href="https://github.com/chenyangxu442-ai/yufeng-ai-assistant" rel="noopener">
+          查看 GitHub
+        </a>
+      </div>
+      <p class="hero__meta">
+        Windows 10/11 · x64 · 约 104 MB · 需要你自备 DeepSeek API key
+        <span class="dot" aria-hidden="true"></span>
+        <a href="#verify" class="inline-link">校验 SHA-256</a>
+      </p>
+
+      <figure class="shot shot--hero shot--dark">
+        <img src="assets/home.png" width="1108" height="410"
+             alt="与风AI助手 对话界面：输入框提示「描述你想要构建的内容」，可切换工作区与模型。">
+        <figcaption>装好后的助手 · 对话界面</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="section" id="features">
+    <div class="wrap">
+      <header class="sec-head">
+        <p class="eyebrow">它做了什么</p>
+        <h2 class="sec-title">四件具体的事，而不是一堆名词。</h2>
+      </header>
+
+      <ol class="facts">
+        <li class="fact">
+          <span class="fact__no">01</span>
+          <h3>电脑体检</h3>
+          <p>检查软件自带的运行环境。<strong>不需要你另外装 Node</strong>，也不需要懂命令行。</p>
+        </li>
+        <li class="fact">
+          <span class="fact__no">02</span>
+          <h3>填 API key</h3>
+          <p>key 只存在本机；只有测试和聊天时才发给 DeepSeek 验证。<strong>服务端不留、不上传。</strong></p>
+        </li>
+        <li class="fact">
+          <span class="fact__no">03</span>
+          <h3>一键安装</h3>
+          <p>联网下载并安装助手内核，装进 <code>%LOCALAPPDATA%\ai-setup\agent</code>，<strong>不污染全局 npm</strong>。</p>
+        </li>
+        <li class="fact">
+          <span class="fact__no">04</span>
+          <h3>打开就能聊</h3>
+          <p>在浏览器里直接开始打字，桌面同时生成「与风AI助手」入口。<strong>升级会保留密钥与聊天记录。</strong></p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- START -->
+  <section class="section section--tint" id="start">
+    <div class="wrap split">
+      <div class="split__text">
+        <p class="eyebrow">三步上手</p>
+        <h2 class="sec-title">从双击到开口说话，中间没有坑。</h2>
+        <ol class="steps">
+          <li><h3>电脑体检</h3><p>自动检查自带环境，顺带检查下载源与 AI 服务连通性，不发送密钥。</p></li>
+          <li><h3>填入 DeepSeek API key</h3><p>去 DeepSeek 官网创建一个，粘进输入框。可点「测一下」先验证是否有效。</p></li>
+          <li><h3>开始安装，然后打开</h3><p>点「开始安装」联网装好内核，再点「打开与风AI助手」即可打字，「帮我写一份周报」就能开始。</p></li>
+        </ol>
+        <p class="note">出问题了？安装器上的「一键修复」会重下组件、重建桌面入口，<strong>保留已有密钥与聊天记录</strong>。</p>
+      </div>
+      <figure class="shot">
+        <img src="assets/installer.png" width="1112" height="805"
+             alt="与风AI助手 安装向导：电脑体检、填入 DeepSeek API key、一键安装、装好了四个步骤。">
+        <figcaption>安装向导</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- SKILLS -->
+  <section class="section" id="skills">
+    <div class="wrap split split--flip">
+      <div class="split__text">
+        <p class="eyebrow">技能库 · 538 条</p>
+        <h2 class="sec-title">选中的技能，只对下一条消息生效。</h2>
+        <p class="sec-lede">
+          聊天页左侧栏底部「技能库」→ 搜索或按类别浏览 → 勾选 → 「写入当前对话」。
+          技能会以 <code>/技能名</code> 令牌进到输入框，<strong>不会自动发送</strong>，你看过再按发送。
+        </p>
+        <ul class="ticks">
+          <li>一次可勾选多条，仅作用于下一条消息，不改变长期设定。</li>
+          <li>538 条中文技能，覆盖职场、写作、创意、生活等类别。</li>
+          <li>技能内容来自上游开源项目，按各自许可分发（见下方「开源」）。</li>
+        </ul>
+      </div>
+      <figure class="shot">
+        <img src="assets/skills.png" width="1124" height="900"
+             alt="技能库面板：搜索「面试」，勾选两条技能后按钮显示「写入当前对话 (2)」，提示仅用于下一条消息。">
+        <figcaption>技能库侧栏 · 勾选写入</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- SCENES (interactive demo) -->
+  <section class="section section--ink" id="scenes">
+    <div class="wrap">
+      <header class="sec-head sec-head--center">
+        <p class="eyebrow">任务场景</p>
+        <h2 class="sec-title">先挑一个场景，再把它写进当前对话。</h2>
+        <p class="sec-lede sec-lede--center">
+          四个常见场景各带一份可直接改的任务模板。下面是<strong>界面示意</strong>，点标签切换看看每个场景要你提供什么。
+        </p>
+      </header>
+
+      <div class="demo" data-demo>
+        <div class="demo__tabs" role="tablist" aria-label="任务场景">
+          <button class="demo__tab is-active" role="tab" id="tab-files" aria-controls="panel-files" aria-selected="true">整理文件</button>
+          <button class="demo__tab" role="tab" id="tab-sheets" aria-controls="panel-sheets" aria-selected="false" tabindex="-1">处理表格</button>
+          <button class="demo__tab" role="tab" id="tab-docs" aria-controls="panel-docs" aria-selected="false" tabindex="-1">写材料</button>
+          <button class="demo__tab" role="tab" id="tab-web" aria-controls="panel-web" aria-selected="false" tabindex="-1">做网页</button>
+        </div>
+
+        <div class="demo__stage">
+          <div class="demo__panel is-active" role="tabpanel" id="panel-files" aria-labelledby="tab-files" tabindex="0">
+            <p class="demo__scene">整理文件</p>
+            <p class="demo__desc">把一堆散乱的文件按类型或日期归好类、批量改名，拿到一份可直接执行的整理方案。</p>
+            <p class="demo__label">需要你提供</p>
+            <p class="demo__need">要整理的文件夹路径；按什么规则整理（类型／日期／名称）；是否要批量重命名。</p>
+            <pre class="demo__tmpl">把 /我的文件 里的文件按 <span class="t">类型</span> 归类，
+同名冲突的加日期前缀，列一份清单给我确认后再动手。</pre>
+          </div>
+          <div class="demo__panel" role="tabpanel" id="panel-sheets" aria-labelledby="tab-sheets" tabindex="0" hidden>
+            <p class="demo__scene">处理表格</p>
+            <p class="demo__desc">从一份表格里得到清洗后的数据、汇总结果或一段能直接用的公式／脚本。</p>
+            <p class="demo__label">需要你提供</p>
+            <p class="demo__need">表格路径或直接贴数据；要算的指标（汇总／对比／环比…）；输出成什么样（表格／说明／图表）。</p>
+            <pre class="demo__tmpl">从 sales.xlsx 里按 <span class="t">月份</span> 汇总销售额，
+算出同比，并写成一段可直接粘回表格的公式。</pre>
+          </div>
+          <div class="demo__panel" role="tabpanel" id="panel-docs" aria-labelledby="tab-docs" tabindex="0" hidden>
+            <p class="demo__scene">写材料</p>
+            <p class="demo__desc">一份能直接交出去的文稿（周报／推文／邮件…），并附上可改的修改建议。</p>
+            <p class="demo__label">需要你提供</p>
+            <p class="demo__need">材料类型和用途；给谁看（受众）；要写进去的要点／素材；大概多少字。</p>
+            <pre class="demo__tmpl">帮我写一份材料。
+类型与用途：&lt;本周项目周报，发给直属领导&gt;
+受众：&lt;非技术背景的管理者&gt;
+要点：&lt;把要写进去的事实／数据／进展列在这里&gt;
+篇幅：&lt;500 字以内&gt;
+要求：先给一版正文，再单独列出可以再强化的地方；不要编造我没提供的数据。</pre>
+          </div>
+          <div class="demo__panel" role="tabpanel" id="panel-web" aria-labelledby="tab-web" tabindex="0" hidden>
+            <p class="demo__scene">做网页</p>
+            <p class="demo__desc">一个用浏览器打开就能用的网页（单文件 HTML），附带怎么继续改的说明。</p>
+            <p class="demo__label">需要你提供</p>
+            <p class="demo__need">网页用途；要展示的内容（文字／图片／数据）；风格偏好（简洁／商务／活泼…）。</p>
+            <pre class="demo__tmpl">做一个单文件 HTML 的活动报名页，
+展示 <span class="t">时间、地点、流程</span>，风格简洁，
+最后告诉我改标题和配图在哪一行。</pre>
+          </div>
+        </div>
+      </div>
+
+      <figure class="shot shot--dark">
+        <img src="assets/scenes.png" width="1400" height="900"
+             alt="与风AI助手 任务场景真实界面：整理文件、处理表格、写材料、做网页四个任务模板，右侧可勾选推荐技能。">
+        <figcaption>真实界面 · 任务模板与推荐技能</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- OPEN SOURCE -->
+  <section class="section" id="opensource">
+    <div class="wrap">
+      <header class="sec-head">
+        <p class="eyebrow">开源</p>
+        <h2 class="sec-title">装好、接上、加侧栏；真正干活的是上游。</h2>
+      </header>
+      <div class="oss">
+        <div class="oss__col">
+          <h3>本项目</h3>
+          <p><strong>自有代码用 MIT 许可。</strong>负责把内核装好、把 DeepSeek 接上、给聊天页加一个技能库侧栏。</p>
+          <p><a class="inline-link" href="https://github.com/chenyangxu442-ai/yufeng-ai-assistant" rel="noopener">github.com/chenyangxu442-ai/yufeng-ai-assistant</a></p>
+        </div>
+        <div class="oss__col">
+          <h3>上游署名</h3>
+          <ul class="oss__list">
+            <li><span>DeepSeek Harness</span><em>AI 助手内核／聊天界面 · 由 DeepSeek 提供，本仓库只下载托管、不改写许可</em></li>
+            <li><span>Node.js</span><em>随包分发的运行时 · MIT 类许可</em></li>
+            <li><span>Electron / Express / yauzl</span><em>各自包内许可</em></li>
+          </ul>
+          <p class="note">538 条技能内容来自上游开源项目，按各自条款分发（CC0 / MIT），版权归原作者。</p>
+        </div>
+      </div>
+      <p class="oss__foot">
+        有问题或建议，欢迎到
+        <a class="inline-link" href="https://github.com/chenyangxu442-ai/yufeng-ai-assistant/issues" rel="noopener">GitHub Issues</a>
+        反馈交流。
+      </p>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="section section--tint" id="faq">
+    <div class="wrap">
+      <header class="sec-head">
+        <p class="eyebrow">常见问题</p>
+        <h2 class="sec-title">先说清楚，免得你装完才发现。</h2>
+      </header>
+      <div class="faq">
+        <details class="qa">
+          <summary>要花钱吗？模型费用怎么算？</summary>
+          <p>软件本身开源、免费下载。<strong>你自己提供 DeepSeek API key</strong>，模型调用产生的费用由服务商（DeepSeek）按量收取，与本软件无关。它不是「完全离线、免费大模型」——需要联网调 DeepSeek 的接口。</p>
+        </details>
+        <details class="qa">
+          <summary>我的 API key 安全吗？</summary>
+          <p>key 只保存在你本机的配置里，只有测试连通性和聊天时才发给 DeepSeek 验证。<strong>本软件不收集、不上传你的密钥</strong>。</p>
+        </details>
+        <details class="qa">
+          <summary>支持哪些系统？</summary>
+          <p>目前只提供 <strong>Windows 10/11 · x64</strong> 安装包。macOS 与 Linux 暂不支持。</p>
+        </details>
+        <details class="qa">
+          <summary>需要先装 Node.js 吗？</summary>
+          <p>不需要。安装包<strong>自带运行环境</strong>，也自带内核。安装过程不会改动你的全局 npm。</p>
+        </details>
+        <details class="qa">
+          <summary>升级或重装会丢聊天记录吗？</summary>
+          <p>不会。装同版本号以上的包升级，<strong>聊天记录、密钥、技能库都会保留</strong>；「一键修复」同样保留已有数据。</p>
+        </details>
+        <details class="qa">
+          <summary>怎么确认下载的安装包没被改过？</summary>
+          <p>对照发布页的 SHA-256 校验值。本页也提供了一份，见下方「校验下载」。</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- DOWNLOAD / VERIFY -->
+  <section class="section section--download" id="verify">
+    <div class="wrap dl">
+      <div class="dl__text">
+        <p class="eyebrow">下载</p>
+        <h2 class="sec-title">与风AI助手 · Windows 0.5.5</h2>
+        <p class="sec-lede">Windows 10/11 · x64 · 约 104 MB（109,329,872 字节）</p>
+        <div class="hero__cta">
+          <a class="btn btn--solid" href="/downloads/Yufeng-AI-Assistant-Setup-0.5.5.exe" data-dl>下载安装包</a>
+          <a class="btn btn--ghost" href="https://github.com/chenyangxu442-ai/yufeng-ai-assistant/releases" rel="noopener">GitHub 备用下载</a>
+        </div>
+        <p class="note">服务器直链：<code>/downloads/Yufeng-AI-Assistant-Setup-0.5.5.exe</code>（支持断点续传）。若直链不可用，请用 GitHub Releases 备用。</p>
+      </div>
+      <div class="dl__hash">
+        <p class="demo__label">SHA-256</p>
+        <code class="hash">9fd89ebdd7a8db795b1aefcfb9c8bfc0e9840e8d03af21ac4de307dee80c5c4a</code>
+        <p class="note">校验命令（Windows PowerShell）：<br><code>Get-FileHash '与风AI助手 Setup 0.5.5.exe' -Algorithm SHA256</code></p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="foot">
+  <div class="wrap foot__in">
+    <div class="foot__brand">
+      <img src="assets/icon-64.png" width="24" height="24" alt="">
+      <span>与风AI助手</span>
+    </div>
+    <nav class="foot__links" aria-label="页脚">
+      <a href="#features">功能</a>
+      <a href="#start">上手</a>
+      <a href="#skills">技能</a>
+      <a href="#scenes">场景</a>
+      <a href="#faq">常见问题</a>
+      <a href="https://github.com/chenyangxu442-ai/yufeng-ai-assistant" rel="noopener">GitHub</a>
+    </nav>
+    <p class="foot__legal">
+      自有代码以 MIT 许可发布；DeepSeek Harness、Node.js、Electron 等上游组件版权归各自作者，
+      技能库内容按 CC0 / MIT 分发。本页为产品官网，安装与使用请以发布页说明为准。
+    </p>
+  </div>
+</footer>
+
+<script src="app.js" defer></script>
+</body>
+</html>
