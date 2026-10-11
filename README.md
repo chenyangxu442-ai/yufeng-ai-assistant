@@ -2,8 +2,6 @@
 
 一键装好 AI 助手，并自动接上 DeepSeek。给不写代码的人用的 Windows 桌面安装器。
 
-![装机首页](docs/images/installer-home.png)
-
 装完之后，你得到的是一个能直接聊天的 AI 助手界面（本地网页 + 桌面快捷方式），
 另带一个 **538 条中文技能的侧栏技能库**——选中就能把技能写进当前对话。
 
@@ -17,11 +15,9 @@
    `%LOCALAPPDATA%\ai-setup\agent`，**不污染全局 npm**。
 4. **打开助手** —— 在浏览器里直接开始打字聊天，桌面同时生成「与风AI助手」入口。
 
-界面截图：
+界面截图（装好后的助手 · 任务场景）：
 
-| 装机向导 | 技能库侧栏（浅色） | 技能库侧栏（深色） |
-|---|---|---|
-| ![装机](docs/images/installer-home.png) | ![技能库](docs/images/harness-skills.png) | ![深色](docs/images/harness-skills-dark.png) |
+![任务场景](docs/images/harness-scenes.png)
 
 ---
 
@@ -42,14 +38,10 @@
   技能会以 `/技能名` 令牌进到输入框，**不会自动发送**，你看过再按发送。
 - **出问题**：安装器上有「一键修复」，会重下组件、重建桌面入口，**保留已有密钥与聊天记录**。
 
-## 联系开发者
+## 开源与反馈
 
-- 微信：**xxx890332**（在界面里点一下即可复制）
-- 邮箱：**chenyangxu442@gmail.com**
-- 开源项目：<https://github.com/chenyangxu442-ai/yufeng-ai-assistant>
-  —— 开源项目，欢迎交流。有疑问请联系，有问题欢迎反馈。
-
-（界面上只提供复制/邮件链接，不会替你发消息。）
+- 项目主页：<https://github.com/chenyangxu442-ai/yufeng-ai-assistant>
+- 有问题或建议，欢迎在 [Issues](../../issues) 里反馈交流。
 
 ---
 
