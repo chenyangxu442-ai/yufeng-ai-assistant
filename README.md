@@ -27,7 +27,9 @@
 
 ## 下载安装
 
-到 [Releases](../../releases) 下载 `与风AI助手 Setup x.y.z.exe` 双击即可。
+到 [Releases](../../releases) 下载 `Yufeng-AI-Assistant-Setup-x.y.z.exe` 双击即可。
+（本地构建产物名是 `与风AI助手 Setup x.y.z.exe`；GitHub 的资产名不支持中文，会自动转成 ASCII，
+安装后的程序与桌面入口仍是「与风AI助手」。）
 
 - 安装位置可自选；会在桌面生成「与风AI助手」快捷方式。
 - 升级装同一版本号以上的安装包即可，聊天记录、密钥、技能库都会保留。
