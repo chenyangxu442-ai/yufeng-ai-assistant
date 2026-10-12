@@ -207,6 +207,8 @@ strong{font-weight:600;color:var(--ink)}
 .section--download .sec-title{color:#fff}
 .section--download .sec-lede{color:#cbe4e1}
 .section--download .note{color:#a9cbc7}
+.section--download .note .inline-link{color:#eaf6f4}
+.section--download .note .inline-link:hover{color:#fff}
 .section--download code{color:#eaf6f4}
 .section--download .btn--solid{background:#fff;color:var(--teal-ink)}
 .section--download .btn--solid:hover{background:#eef6f5}
