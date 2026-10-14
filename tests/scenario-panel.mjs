@@ -32,11 +32,12 @@ function log(...a) { console.log(...a); }
 
 // 把文字真的打进作曲器:焦点到 contenteditable,再用 CDP 的插入文本(等价于输入法/键盘输入)。
 async function typeIntoComposer(chrome, text) {
-  const focused = await chrome.evaluate(`(() => { const el = document.querySelector('[data-composer-input]'); if (!el) return false; el.focus(); return true; })()`);
-  assert.ok(focused, '作曲器输入面不存在,无法预置草稿');
+  const box = await chrome.waitFor(`(() => { const el = document.querySelector('[data-composer-input]'); if (!el || el.contentEditable !== 'true') return null; const r = el.getBoundingClientRect(); return r.width && r.height ? { x: r.x + 12, y: r.y + 12 } : null; })()`, { timeout: 8000 });
+  assert.ok(box, '作曲器输入面不存在,无法预置草稿');
+  await chrome.send('Input.dispatchMouseEvent', { type: 'mousePressed', ...box, button: 'left', clickCount: 1 });
+  await chrome.send('Input.dispatchMouseEvent', { type: 'mouseReleased', ...box, button: 'left', clickCount: 1 });
   await chrome.send('Input.insertText', { text });
-  await sleep(500);
-  return chrome.evaluate(`${DRAFT}.includes(${JSON.stringify(text)})`);
+  return chrome.waitFor(`${DRAFT}.includes(${JSON.stringify(text)})`, { timeout: 5000 });
 }
 
 async function main() {

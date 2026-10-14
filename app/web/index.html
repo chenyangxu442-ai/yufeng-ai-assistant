@@ -378,7 +378,7 @@ async function runInstall(repair = false) {
   if ($('installBtn').disabled) return;
   clearBanner();
   const key = $('key').value.trim();
-  if (key && !/^sk-[A-Za-z0-9_-]+$/.test(key)) return banner('请粘贴完整密钥，不要包含空格或换行', 'err');
+  if (!repair && key && !/^sk-[A-Za-z0-9_-]+$/.test(key)) return banner('请粘贴完整密钥，不要包含空格或换行', 'err');
   if (!repair && !key && !configured) return banner('请先粘贴 DeepSeek 密钥', 'err');
 
   const btn = $('installBtn');
@@ -413,11 +413,12 @@ async function runInstall(repair = false) {
     let buf = '';
     let failed = false;
     let completed = false;
+    let completionScope = null;
     const consume = (line) => {
       if (!line.trim()) return;
       const ev = JSON.parse(line);
       if (ev.type === 'stage-fail' || ev.type === 'error') failed = true;
-      if (ev.type === 'done') completed = true;
+      if (ev.type === 'done') { completed = true; completionScope = ev.scope; }
       handleEvent(ev);
     };
 
@@ -439,6 +440,14 @@ async function runInstall(repair = false) {
       return;
     }
     if (!completed) throw new Error('安装进度中断，尚未确认完成，请重试');
+
+    if (repair && completionScope === 'shortcut') {
+      $('doneCard').style.display = 'block';
+      $('doneText').textContent = '桌面入口已修复，原有助手可以继续使用。';
+      banner('桌面入口已修复，可以打开与风AI助手。', 'ok');
+      btn.disabled = false; btn.textContent = '重新安装';
+      return;
+    }
 
     configured = true;
     setCfg(true);

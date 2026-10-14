@@ -287,8 +287,10 @@ function createServer({ onInstalled, initialShortcut = null, networkCheck = chec
       if (repair && active) {
         if (!await reachable(active.url)) throw new Error('助手进程仍在运行但未响应，请重启电脑后再点“一键修复”');
         send({ type: 'note', message: '助手运行正常，本次只修复桌面入口，无需重新下载' });
-        send({ type: 'shortcut', ...(await ensureShortcut()) });
-        send({ type: 'done' });
+        const repaired = await ensureShortcut();
+        send({ type: 'shortcut', ...repaired });
+        if (!repaired.ok) throw new Error(repaired.message || '桌面入口修复失败，请重试');
+        send({ type: 'done', scope: 'shortcut' });
         return;
       }
       if (repair && !config.isConfigured()) throw new Error('未找到已保存的密钥，请先填入密钥并点“开始安装”');

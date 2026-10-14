@@ -79,7 +79,7 @@ async function launchScenario(initialArgs, earlyArgs, lateArgs, fail = false) {
   assert.deepEqual(await launchScenario(['app.exe', '--open-ai'], null, null, true), { calls: 1, errors: 1 });
   console.log('PASS 首次快捷启动、就绪前请求、重复点击、普通启动和失败提示');
   const module = { exports: {} };
-  let installedCalls = 0, requestedRepair = false, downloadOk = true;
+  let installedCalls = 0, requestedRepair = false, downloadOk = true, running = false;
   const serverContext = { module, __dirname: path.join(__dirname, '../app'), process, console, URL, setTimeout, setInterval, clearInterval, Buffer,
     require(name) {
       const leaf = path.basename(name);
@@ -89,14 +89,18 @@ async function launchScenario(initialArgs, earlyArgs, lateArgs, fail = false) {
       if (leaf === 'log') return { redact: value => value, info() {}, error() {} };
       if (leaf === 'runtime') return {};
       if (leaf === 'test') return { testDeepSeek: async () => ({ ok: true }) };
-      if (leaf === 'web-ready') return { webReady: async () => false };
+      if (leaf === 'web-ready') return { webReady: async () => running };
+      if (name === 'fs') return { ...fs, readFileSync(file, ...args) {
+        if (running && String(file).endsWith('.ai-setup-session.json')) return JSON.stringify({ pid: process.pid, url: 'http://127.0.0.1:3080/' });
+        return fs.readFileSync(file, ...args);
+      } };
       if (leaf === 'network') return { checkNetwork: async () => ({ items: [], downloadOk: true, serviceOk: true }) };
       if (name === 'express') return require('../app/node_modules/express');
       return require(name);
     } };
   vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../app/server.js'), 'utf8'), serverContext);
-  let shortcutCalls = 0;
-  const { port, server } = await module.exports.createServer({ onInstalled: () => { shortcutCalls++; throw Error('desktop denied'); }, networkCheck: async () => ({ items: [], downloadOk, serviceOk: false }) });
+  let shortcutCalls = 0, shortcutFails = true;
+  const { port, server } = await module.exports.createServer({ onInstalled: () => { shortcutCalls++; if (shortcutFails) throw Error('desktop denied'); return { ok: true, message: '桌面入口已创建' }; }, networkCheck: async () => ({ items: [], downloadOk, serviceOk: false }) });
   try {
     const response = await fetch(`http://127.0.0.1:${port}/api/install`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
     const events = (await response.text()).trim().split('\n').map(line => JSON.parse(line));
@@ -121,5 +125,19 @@ async function launchScenario(initialArgs, earlyArgs, lateArgs, fail = false) {
     assert(repairEvents.some(event => event.type === 'done'));
     assert(repairEvents.some(event => event.type === 'note' && /AI 服务/.test(event.message)));
     console.log('PASS 修复接口、下载失败先终止、AI服务故障允许安装并提示');
+    running = true;
+    const activeRepair = await fetch(`http://127.0.0.1:${port}/api/repair`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+    const activeEvents = (await activeRepair.text()).trim().split('\n').map(JSON.parse);
+    assert(activeEvents.some(event => event.type === 'error'), '运行中只修桌面入口，入口失败必须明确报错');
+    assert(!activeEvents.some(event => event.type === 'done'), '唯一的修复动作失败时不能报告修复成功');
+    assert.equal(installedCalls, 2, '运行中的助手不能重装组件');
+    console.log('PASS 运行中修复桌面入口失败，不误报全部完成');
+    shortcutFails = false;
+    const successfulRepair = await fetch(`http://127.0.0.1:${port}/api/repair`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+    const successEvents = (await successfulRepair.text()).trim().split('\n').map(JSON.parse);
+    assert(successEvents.some(event => event.type === 'done' && event.scope === 'shortcut'));
+    assert(!successEvents.some(event => event.type === 'error'));
+    assert.equal(installedCalls, 2);
+    console.log('PASS 运行中入口修复成功，明确标识仅修复入口且不重装');
   } finally { server.closeAllConnections(); await new Promise(resolve => server.close(resolve)); }
 })().catch(e => { console.error(e); process.exitCode = 1; });

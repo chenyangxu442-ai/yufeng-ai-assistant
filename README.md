@@ -75,6 +75,8 @@ node scripts/dist.js        # 出 release/与风AI助手 Setup <版本>.exe
 
 ```bash
 cd app && npm test                 # 单元/回归
+cd app && npm run test:ui          # 真 Chrome：首页、技能库发送/重试、任务场景
+cd app && npm run test:package     # 已构建安装包：源码一致性与 ASAR 实际运行
 node ../tests/verify-package.js    # 打包产物:版本、技能数、exe 内嵌图标与版本资源
 node ../tests/packaged-asar.mjs    # 打包后的运行时(需要已构建)
 node ../tests/installer-branding.mjs  # 真 Chrome 打开装机首页核对品牌/联系方式

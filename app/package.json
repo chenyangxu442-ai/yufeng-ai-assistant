@@ -7,7 +7,9 @@
   "scripts": {
     "start": "electron .",
     "server": "node server.js",
-    "test": "node ../tests/regression.js && node ../tests/shortcut.js && node ../tests/network-repair.js && node ../tests/skills.js && node ../tests/features.js && node ../tests/file-faults.js && node ../tests/private-env.js",
+    "test": "node ../tests/regression.js && node ../tests/shortcut.js && node ../tests/installer-honesty.mjs && node ../tests/network-repair.js && node ../tests/skills.js && node ../tests/features.js && node ../tests/file-faults.js && node ../tests/private-env.js",
+    "test:ui": "node ../tests/installer-branding.mjs && node ../tests/panel-runtime.mjs --submit && node ../tests/scenario-panel.mjs",
+    "test:package": "node ../tests/verify-package.js && node ../tests/packaged-asar.mjs",
     "dist": "node scripts/dist.js"
   },
   "dependencies": {

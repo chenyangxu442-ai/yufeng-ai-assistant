@@ -19,7 +19,7 @@ import { launchChrome, sleep } from './cdp.mjs';
 
 const require = createRequire(import.meta.url);
 const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const TESTDIR = path.join(REPO, 'work', 'harness-panel-runtime-test');
+const TESTDIR = fs.mkdtempSync(path.join(REPO, 'work', 'harness-panel-runtime-'));
 const HOME = path.join(TESTDIR, 'home');
 const AGENT = path.join(REPO, 'work', 'agent-bundle-e2e-qJTB72', 'agent');
 const SHOTS = path.join(TESTDIR, 'shots');
@@ -33,7 +33,7 @@ const SUBMIT = process.argv.includes('--submit');
 // exits; the finally block cleans up only the processes this run spawned.
 const HARD_TIMEOUT_MS = 90 * 1000;
 const BOOT_TIMEOUT_MS = 45 * 1000;
-const FETCH_OPTS = { signal: AbortSignal.timeout(10000) };
+const fetchOpts = () => ({ signal: AbortSignal.timeout(10000) });
 
 const EXT_ID = '@ai-setup/dsh-client-ui-skill-library';
 
@@ -71,7 +71,7 @@ async function boot(extraEnv = {}) {
   }, null, 2) + '\n');
 
   const { node, dshBin } = detect.env();
-  const child = spawn(node, [dshBin, 'web', '--no-open'], {
+  const child = spawn(node, [dshBin, 'web', '--no-open', '--port', '0'], {
     cwd: HOME,
     env: { ...runtime.childEnv(node), DSH_HOME: HOME, DEEPSEEK_API_KEY: DUMMY_KEY, ...extraEnv },
     windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'],
@@ -87,7 +87,10 @@ async function boot(extraEnv = {}) {
 
   const deadline = Date.now() + BOOT_TIMEOUT_MS;
   while (!url && Date.now() < deadline && child.exitCode === null) await sleep(150);
-  assert.ok(url, 'DSH 没有打印出访问地址: ' + (err || out).slice(-800));
+  if (!url) {
+    killTree(child.pid);
+    throw new Error('DSH 没有打印出访问地址: ' + (err || out).slice(-800));
+  }
   const u = new URL(url);
   log('· 助手已启动:' + u.origin);
   return { child, url, base: u.origin, token: u.searchParams.get('token') || '', kill: () => killTree(child.pid) };
@@ -102,14 +105,14 @@ function killTree(pid) {
 async function verifyServed(base, token) {
   // 首页是 __DSH_BOOT__ 的宿主;扩展的 bundle URL 就写在里面(带 rev 的 combo 形式)。
   // ?token= 会 303 到 /,并把 token 换成 cookie —— Node fetch 不自动存 cookie,手动带上。
-  const first = await fetch(`${base}/?token=${token}`, { redirect: 'manual', ...FETCH_OPTS });
+  const first = await fetch(`${base}/?token=${token}`, { redirect: 'manual', ...fetchOpts() });
   const cookie = String(first.headers.get('set-cookie') || '').split(';')[0];
-  const index = await fetch(`${base}/`, { headers: cookie ? { cookie } : {}, ...FETCH_OPTS });
+  const index = await fetch(`${base}/`, { headers: cookie ? { cookie } : {}, ...fetchOpts() });
   const html = await index.text();
   assert.ok(html.includes('__DSH_BOOT__'), '首页不含 __DSH_BOOT__');
   const m = new RegExp('/plugins/[^"\'\\\\ ]*' + EXT_ID.replace(/[/@.]/g, '\\$&') + '/client\\.js[^"\'\\\\ ]*').exec(html);
   assert.ok(m, '首页的 __DSH_BOOT__ 未收录扩展(装载器没发现它)');
-  const bundle = await fetch(base + m[0].replace(/&amp;/g, '&'), FETCH_OPTS);
+  const bundle = await fetch(base + m[0].replace(/&amp;/g, '&'), { headers: cookie ? { cookie } : {}, ...fetchOpts() });
   assert.equal(bundle.status, 200, '扩展 bundle 未被服务:' + bundle.status);
   const body = await bundle.text();
   assert.ok(body.includes(EXT_ID), 'bundle 内容不含包 id');
@@ -357,7 +360,7 @@ async function main() {
     await chrome.evaluate(`(() => { const b = Array.from(document.querySelectorAll('button')).find(x => (x.innerText||'').startsWith('写入当前对话')); if (!b) throw new Error('找不到写入按钮'); b.click(); })()`);
     await sleep(1200);
     const tokens = await chrome.evaluate(`Array.from(document.querySelectorAll('[data-composer-input] [data-composer-text-ref]')).map(e => e.innerText)`);
-    assert.equal(tokens.length, 2, '写入后草稿令牌数不是 2:' + JSON.stringify(tokens));
+    assert.equal(tokens.length, 2, '写入后草稿令牌数不是 2:' + JSON.stringify({ tokens, state: await chrome.evaluate(`({ draft: document.querySelector('[data-composer-input]')?.innerText, button: document.querySelector('.aiskill-primary')?.outerHTML, chips: document.querySelectorAll('.aiskill-chip').length })`) }));
     assert.ok(tokens.every(t => /^\/library-/.test(t)), '草稿令牌不是原生 /技能名:' + JSON.stringify(tokens));
     results.push('选两条→写入,草稿出现原生令牌 ' + JSON.stringify(tokens));
     await chrome.screenshot(path.join(SHOTS, 'b-draft.png'));

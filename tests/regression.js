@@ -13,27 +13,29 @@ async function check(name, run) {
   try { await run(); console.log('PASS ' + name); }
   catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); }
 }
-async function ui(stream, rejectTest = false) {
+async function ui(stream, rejectTest = false, state = { installed: false, configured: false }) {
   const els = new Map();
   const element = () => ({ style: {}, dataset: {}, classList: { toggle() {} }, textContent: '', innerHTML: '', value: '', disabled: false,
     querySelector() { return element(); }, appendChild() {}, scrollIntoView() {} });
   const get = id => { if (!els.has(id)) els.set(id, element()); return els.get(id); };
   get('key').value = 'sk-fake-test-only';
+  const calls = [];
   const ctx = {
     document: { getElementById: get, querySelectorAll: () => [], querySelector: element, createElement: element },
     IntersectionObserver: class { observe() {} }, TextDecoder, AbortSignal, console,
     fetch: async (url) => {
-      if (url === '/api/install') return new Response(stream, { headers: { 'content-type': 'application/x-ndjson' } });
+      calls.push(url);
+      if (url === '/api/install' || url === '/api/repair') return new Response(stream, { headers: { 'content-type': 'application/x-ndjson' } });
       if (url === '/api/test') { if (rejectTest) throw new Error('offline'); return Response.json({ ok: true }); }
       if (url === '/api/detect') return Response.json({ items: [] });
-      return Response.json({ installed: false, configured: false });
+      return Response.json(state);
     },
   };
   vm.createContext(ctx);
   const source = fs.readFileSync(path.join(root, 'app/web/index.html'), 'utf8').match(/<script>([\s\S]*?)<\/script>/)[1];
   vm.runInContext(source, ctx);
   await new Promise(resolve => setImmediate(resolve));
-  return { get, ctx };
+  return { get, ctx, calls };
 }
 (async () => {
   await check('配置拒绝换行注入且不改原文件', () => {
@@ -77,6 +79,20 @@ async function ui(stream, rejectTest = false) {
     await get('testKey').onclick();
     assert.equal(get('testKey').disabled, false);
     assert.match(get('banner').textContent, /失败|offline/);
+  });
+  await check('一键修复忽略未保存的错误密钥输入', async () => {
+    const { get, calls } = await ui('{"type":"done"}\n', false, { installed: true, configured: true });
+    get('key').value = '无关的未保存输入';
+    await get('repairBtn').onclick();
+    assert.ok(calls.includes('/api/repair'), '修复应使用已保存的密钥，不应被输入框阻止');
+  });
+  await check('仅修复桌面入口不额外测密钥且保留未保存输入', async () => {
+    const { get, calls } = await ui('{"type":"done","scope":"shortcut"}\n', false, { installed: true, configured: true });
+    get('key').value = 'sk-unsaved-input';
+    await get('repairBtn').onclick();
+    assert.ok(!calls.includes('/api/test'), '修复桌面入口不应触发模型连接测试');
+    assert.equal(get('key').value, 'sk-unsaved-input');
+    assert.match(get('banner').textContent, /桌面入口.*修复/);
   });
   await check('助手打印地址后立即崩溃不能报成功', async () => {
     const cp = require('node:child_process');
